@@ -1,24 +1,23 @@
-# echo-server.py
+# server.py
+# Ryan Christopher
+# Pawprint: rdcb2f
 
 import socket
 
 def main():
-
-    HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
-    PORT = 19786  # Port to listen on (non-privileged ports are > 1023)
+    HOST = "127.0.0.1" 
+    PORT = 19786  # 1, Last 4 digits of pawprint
 
     users = []
 
     f = open('users.txt', 'r')
-
     for line in f:
         strip1 = line.strip("(")
         strip2 = strip1.strip(")\n")
         splitLine= strip2.split(", ")
 
         users.append((splitLine[0], splitLine[1]))
-
-    # print(users)
+    f.close()
 
     serverOpen = True
     currentUser = None
@@ -29,8 +28,6 @@ def main():
             s.listen()
             conn, addr = s.accept()
             with conn:
-                print(f"Connected by {addr}")
-                # while True:
                 data = conn.recv(1024)
                 dataStr = data.decode()
 
@@ -55,7 +52,7 @@ def main():
                     userPass = sData[2]
                     validUser = validNewUser(users, userID)
                     if validUser: # UserID is not already used
-                        users.append(userID, userPass)
+                        users.append((userID, userPass))
                         print("New user account created.")
                         conn.sendall(bytes("New user account created. Please login.", 'utf-8'))
                     else:
@@ -72,7 +69,13 @@ def main():
                     serverOpen = False 
                     print(currentUser + " logout.") 
                     conn.sendall(bytes(currentUser + " left.", 'utf-8')) 
-                    break       
+                    f2 = open('users.txt', 'w')
+                    for user in users:
+                        msg = "(" + user[0] + ", " + user[1] + ")\n"
+                        f2.write(msg)
+                    f2.close()
+
+                    break
 
 
 # Check if login request was done with correct id and password
@@ -81,12 +84,6 @@ def validLoginInfo(users, userID, userPass):
     for user in users:
         if user[0] == userID and user[1] == userPass:
             valid = True
-
-    # Testing
-    if valid:
-        print("\nvalid")
-    else:
-        print("\nnot valid")
 
     return valid
 
@@ -97,7 +94,5 @@ def validNewUser(users, userID):
             valid = False
 
     return valid
-
-
 
 main()
