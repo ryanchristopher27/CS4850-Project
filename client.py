@@ -7,11 +7,15 @@ import socket
 # Global Variables
 clientOpen = True
 loggedIn = False
-global userID
+userID = None
 
 def main():
     HOST = "127.0.0.1"
     PORT = 19786  # 1, Last 4 digits of pawprint
+
+    global clientOpen
+    global loggedIn
+    global userID
 
     while clientOpen:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

@@ -14,13 +14,18 @@ users = []
 loggedInUsers = []
 threadCount = 0
 maxThreadCount = 3
-connns = {}
+conns = {}
 
 def main():
     HOST = "127.0.0.1" 
     PORT = 19786  # 1, Last 4 digits of pawprint
 
-    # users = []
+    global printLock
+    global users
+    global loggedInUsers
+    global threadCount
+    global maxThreadCount
+    global conns
 
     f = open('users.txt', 'r')
     for line in f:
@@ -61,8 +66,8 @@ def validNewUser(users, userID):
 def threaded(c):
     currentUser = None
     while True:
-        # data = c.recv(1024)
-        data = c.recv(2048)
+        data = c.recv(1024)
+        # data = c.recv(2048)
         dataStr = data.decode()
 
         # Handle Client Input
