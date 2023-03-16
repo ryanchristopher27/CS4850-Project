@@ -9,15 +9,19 @@ def main():
     PORT = 19786  # 1, Last 4 digits of pawprint
 
     users = []
+    userFileCreated = True
 
-    f = open('users.txt', 'r')
-    for line in f:
-        strip1 = line.strip("(")
-        strip2 = strip1.strip(")\n")
-        splitLine= strip2.split(", ")
+    try:
+        f = open('users.txt', 'r')
+        for line in f:
+            strip1 = line.strip("(")
+            strip2 = strip1.strip(")\n")
+            splitLine= strip2.split(", ")
 
-        users.append((splitLine[0], splitLine[1]))
-    f.close()
+            users.append((splitLine[0], splitLine[1]))
+        f.close()
+    except IOError:
+        userFileCreated = False
 
     serverOpen = True
     currentUser = None
@@ -53,6 +57,13 @@ def main():
                     validUser = validNewUser(users, userID)
                     if validUser: # UserID is not already used
                         users.append((userID, userPass))
+                        # Create users file if not already created and write users
+                        f3 = open('users.txt', 'w')
+                        for user in users:
+                            msg = "(" + user[0] + ", " + user[1] + ")\n"
+                            f3.write(msg)
+                        f3.close()
+
                         print("New user account created.")
                         conn.sendall(bytes("New user account created. Please login.", 'utf-8'))
                     else:
@@ -66,16 +77,10 @@ def main():
 
                 # Log Out
                 elif sData[0] == "logout":
-                    serverOpen = False 
+                    # serverOpen = False 
+                    currentUser = None
                     print(currentUser + " logout.") 
                     conn.sendall(bytes(currentUser + " left.", 'utf-8')) 
-                    f2 = open('users.txt', 'w')
-                    for user in users:
-                        msg = "(" + user[0] + ", " + user[1] + ")\n"
-                        f2.write(msg)
-                    f2.close()
-
-                    break
 
 
 # Check if login request was done with correct id and password

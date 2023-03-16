@@ -48,7 +48,10 @@ def main():
             else:
                 # Send Message
                 if inpSplit[0] == "send":
-                    if len(inpSplit[1]) > 0 and len(inpSplit[1]) < 257:
+                    lenCheck = -1
+                    for val in inpSplit[1:]:
+                        lenCheck += len(val) + 1
+                    if lenCheck > 0 and lenCheck < 257:
                         s.sendall(bytes(inp, 'utf-8'))
                         data = s.recv(1024)
                         dataStr = data.decode()
