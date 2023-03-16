@@ -1,6 +1,10 @@
 # server.py
 # Ryan Christopher
 # Pawprint: rdcb2f
+# Date: 3/17/2023
+
+# Description: This program contains the code that runs the server
+    # It receives messages from the clients and returns the appropriate message back
 
 import socket
 
@@ -25,6 +29,8 @@ def main():
 
     serverOpen = True
     currentUser = None
+
+    print("\nMy chat room server. Version One.\n")
 
     while serverOpen:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -78,9 +84,9 @@ def main():
                 # Log Out
                 elif sData[0] == "logout":
                     # serverOpen = False 
-                    currentUser = None
                     print(currentUser + " logout.") 
                     conn.sendall(bytes(currentUser + " left.", 'utf-8')) 
+                    currentUser = None
 
 
 # Check if login request was done with correct id and password

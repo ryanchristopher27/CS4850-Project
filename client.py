@@ -1,12 +1,19 @@
 # client.py
 # Ryan Christopher
 # Pawprint: rdcb2f
+# Date: 3/17/2023
+
+# Description: This program contains the code that runs the client
+    # The user is able to input commands and send them to the server
+    # The user commands are filtered within the client
 
 import socket
 
 def main():
     HOST = "127.0.0.1"
     PORT = 19786  # 1, Last 4 digits of pawprint
+
+    print("\nMy chat room client. Version One.\n")
 
     clientOpen = True
     loggedIn = False
@@ -44,7 +51,7 @@ def main():
                 
                 # Invalid Input
                 else:
-                    print("Denied. Please Log In First.")
+                    print(">Denied. Please Log In First.")
             else:
                 # Send Message
                 if inpSplit[0] == "send":
