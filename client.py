@@ -1,6 +1,14 @@
+# client.py
+# Ryan Christopher
+# Pawprint: rdcb2f
+# Date: 3/17/2023
+
+# Description: This is the program that runs the client
+    # It allows the user to input commands into the client
+    # These commands are filtered within this program and sent to the server
+    # The client can also receive messages from the server
+
 import socket
-import select
-import sys
 import threading
 
 HOST = '127.0.0.1'
@@ -57,7 +65,7 @@ def main():
                 
                 # Invalid Input
                 else:
-                    print("> Denied. Please log in first.")
+                    print("Denied. Please log in first.")
 
             # Client logged in
             else:
@@ -80,7 +88,7 @@ def main():
 
                 # Invalid Input
                 else:
-                    print("> Error, not a valid input>")
+                    print("Error, not a valid input>")
 
         listenThread.join()
         

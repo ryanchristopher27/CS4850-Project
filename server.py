@@ -1,3 +1,12 @@
+# server.py
+# Ryan Christopher
+# Pawprint: rdcb2f
+# Date: 3/17/2023
+
+# Description: This is the program that runs the server
+    # It receives messages from the clients and returns a corresponding output
+    # Up to 3 clients are able to connect to this server at all times
+
 import socket
 import threading
 
@@ -15,6 +24,7 @@ def handleClient(clientSocket, client_id):
     global numOfClients
 
     while True:
+        # Get data from client
         data = clientSocket.recv(1024)
         if not data:
             break
@@ -68,6 +78,7 @@ def handleClient(clientSocket, client_id):
                 msg = dataStr.replace("send all ", "")
                 clientMsg = currentUser + ": " + msg
                 print(clientMsg)
+                # Send message to all other clients
                 for id, socket in clientSocketDict.items():
                     if id != client_id:
                         socket.sendall(bytes(clientMsg, 'utf-8'))
@@ -79,7 +90,7 @@ def handleClient(clientSocket, client_id):
                 clientMsg = currentUser + ": " + msg
                 serverMsg = currentUser + " (to " + rec + "): " + msg
                 print(serverMsg)
-                
+                # Send message to specific client
                 for id, socket in clientSocketDict.items():
                     if clientUserDict[id] == rec:
                         socket.sendall(bytes(clientMsg, 'utf-8'))
@@ -89,9 +100,7 @@ def handleClient(clientSocket, client_id):
             msg = ""
             for key in clientUserDict:
                 msg = msg + clientUserDict[key] + ", "
-
             msg = msg.strip(", ")
-
             clientSocket.send(bytes(msg, 'utf-8'))
 
         # Logout Function
@@ -101,6 +110,7 @@ def handleClient(clientSocket, client_id):
             for id, socket in clientSocketDict.items():
                     socket.sendall(bytes(msg, 'utf-8'))
             currentUser = None
+            # Delete client from dictionaries
             del clientSocketDict[client_id]
             del clientUserDict[client_id]
             numOfClients -= 1
@@ -141,6 +151,7 @@ def main():
     except IOError:
         userFileCreated = False
 
+    # Open server socket
     serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serverSocket.bind((HOST, PORT))
     serverSocket.listen(MAXCLIENTS)
@@ -150,7 +161,7 @@ def main():
 
     while True:
         numOfClients += 1
-        if numOfClients <= 3:
+        if numOfClients <= MAXCLIENTS:
             clientSocket, client_address = serverSocket.accept()
 
             # add new client to dictionary
