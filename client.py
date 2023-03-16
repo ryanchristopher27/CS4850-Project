@@ -88,7 +88,7 @@ def main():
 
                 # Invalid Input
                 else:
-                    print("Error, not a valid input>")
+                    print("Error, not a valid input.")
 
         listenThread.join()
         
