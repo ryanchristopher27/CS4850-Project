@@ -1,103 +1,48 @@
-# server.py
-# Ryan Christopher
-# Pawprint: rdcb2f
-
 import socket
+import threading
+
+HOST = '127.0.0.1'
+PORT = 19786
+MAX_CLIENTS = 3
+
+clients = {}  # dictionary to keep track of connected clients
+
+def handle_client(client_socket, client_id):
+    # handle client requests
+    while True:
+        data = client_socket.recv(1024)
+        if not data:
+            break
+        # send message to specific other client
+        message = f"Client {client_id}: {data.decode()}"
+        for id, socket in clients.items():
+            if id == client_id:
+                socket.send(message.encode())
+    client_socket.close()
+    del clients[client_id]  # remove client from dictionary when it disconnects
 
 def main():
-    HOST = "127.0.0.1" 
-    PORT = 19786  # 1, Last 4 digits of pawprint
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind((HOST, PORT))
+    server_socket.listen(MAX_CLIENTS)
+    print(f"Server is listening on {HOST}:{PORT}")
 
-    users = []
-    userFileCreated = True
+    client_id = 1  # start with client ID 1
 
-    try:
-        f = open('users.txt', 'r')
-        for line in f:
-            strip1 = line.strip("(")
-            strip2 = strip1.strip(")\n")
-            splitLine= strip2.split(", ")
+    while True:
+        client_socket, client_address = server_socket.accept()
+        print(f"New connection from {client_address}")
 
-            users.append((splitLine[0], splitLine[1]))
-        f.close()
-    except IOError:
-        userFileCreated = False
+        # add new client to dictionary
+        clients[client_id] = client_socket
 
-    serverOpen = True
-    currentUser = None
+        print("New Client ID: ", client_id)
 
-    while serverOpen:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind((HOST, PORT))
-            s.listen()
-            conn, addr = s.accept()
-            with conn:
-                data = conn.recv(1024)
-                dataStr = data.decode()
+        # start a new thread to handle the client
+        client_thread = threading.Thread(target=handle_client, args=(client_socket, client_id))
+        client_thread.start()
 
-                # Handle Client Input
-                sData = dataStr.split(" ")
+        client_id += 1  # increment client ID
 
-                # User Log In
-                if sData[0] == "login":
-                    userID = sData[1]
-                    userPass = sData[2]
-                    validLogin = validLoginInfo(users, userID, userPass)
-                    if validLogin: # User logged in with correct userID and Password
-                        print(userID + " login.")
-                        conn.sendall(bytes("login confirmed", 'utf-8'))
-                        currentUser = userID
-                    else:
-                        conn.sendall(bytes("Denied. Username or Password incorrect.", 'utf-8'))
-                
-                # Create New User
-                elif sData[0] == "newuser":
-                    userID = sData[1]
-                    userPass = sData[2]
-                    validUser = validNewUser(users, userID)
-                    if validUser: # UserID is not already used
-                        users.append((userID, userPass))
-                        # Create users file if not already created and write users
-                        f3 = open('users.txt', 'w')
-                        for user in users:
-                            msg = "(" + user[0] + ", " + user[1] + ")\n"
-                            f3.write(msg)
-                        f3.close()
-
-                        print("New user account created.")
-                        conn.sendall(bytes("New user account created. Please login.", 'utf-8'))
-                    else:
-                        conn.sendall(bytes("Denied. User account already exists.", 'utf-8'))
-
-                # Send Message
-                elif sData[0] == "send":
-                    message = currentUser + ": " + dataStr.strip("send ")
-                    print(message)
-                    conn.sendall(bytes(message, 'utf-8]')) 
-
-                # Log Out
-                elif sData[0] == "logout":
-                    # serverOpen = False 
-                    currentUser = None
-                    print(currentUser + " logout.") 
-                    conn.sendall(bytes(currentUser + " left.", 'utf-8')) 
-
-
-# Check if login request was done with correct id and password
-def validLoginInfo(users, userID, userPass):
-    valid = False
-    for user in users:
-        if user[0] == userID and user[1] == userPass:
-            valid = True
-
-    return valid
-
-def validNewUser(users, userID):
-    valid = True
-    for user in users:
-        if user[0] == userID:
-            valid = False
-
-    return valid
-
-main()
+if __name__ == '__main__':
+    main()
