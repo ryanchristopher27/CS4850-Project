@@ -1,22 +1,43 @@
 import socket
+import select
+import sys
+import threading
 
 HOST = '127.0.0.1'
 PORT = 19786
+loggedIn = False
+userTemp = ""
+user = ""
 
+def constantServerListen(socket):
+    global loggedIn
+    global user
+    global userTemp
+    while True:
+        data = socket.recv(1024)
+        dataStr = data.decode()
+        if dataStr == user + " left.":
+            break
+
+        print(dataStr)
+        # print(">")
+        if dataStr == "login confirmed":
+            loggedIn = True
+            user = userTemp
 
 def main():
-
-    loggedIn = False
+    global userTemp
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((HOST, PORT))
 
-        # client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # client_socket.connect((HOST, PORT))
-        print(f"Connected to server at {HOST}:{PORT}")
+        print("\nMy chat room client. Version Two.\n")
+
+        listenThread = threading.Thread(target=constantServerListen, args=(s,))
+        listenThread.start()
 
         while True:
-            inp = input(">")
+            inp = input("")
             inpSplit = inp.split(" ")
 
             # Client not logged in
@@ -24,12 +45,7 @@ def main():
                 # Login Function
                 if inpSplit[0] == "login":
                     s.sendall(bytes(inp, 'utf-8'))
-                    data = s.recv(1024)
-                    dataStr = data.decode()
-                    print(">" + dataStr)
-
-                    if dataStr == "login confirmed":
-                        loggedIn = True
+                    userTemp = inpSplit[1]
                 
                 # New User Function
                 elif inpSplit[0] == "newuser":
@@ -38,9 +54,6 @@ def main():
                         # Check length of User Password
                         if len(inpSplit[2]) > 3 and len(inpSplit[2]) < 9:
                             s.sendall(bytes(inp, 'utf-8'))
-                            data = s.recv(1024)
-                            dataStr = data.decode()
-                            print(">" + dataStr)
                 
                 # Invalid Input
                 else:
@@ -55,38 +68,21 @@ def main():
                         lenCheck += len(val) + 1
                     if lenCheck > 0 and lenCheck < 257:
                         s.sendall(bytes(inp, 'utf-8'))
-                        data.recv(1024)
-                        dataStr = data.decode()
-                        print(">" + dataStr)
 
                 # Who Function
                 elif inpSplit[0] == "who":
                     s.sendall(bytes(inp, 'utf-8'))
-                    data.recv(1024)
-                    dataStr = data.decode()
-                    print(">" + dataStr)
                 
                 # Logout Function
                 elif inpSplit[0] == "logout":
                     s.sendall(bytes(inp, 'utf-8'))
-                    data = s.recv(1024)
-                    dataStr = data.decode()
-                    print(">" + dataStr)
+                    break
 
                 # Invalid Input
                 else:
                     print("> Error, not a valid input>")
 
-
-            # recipient = input("Enter recipient ID: ")
-            # message = input("Enter a message to send: ")
-            # client_socket.send(f"{recipient}:{message}".encode())
-            # response = client_socket.recv(1024)
-            # print(f"Server response: {response.decode()}")
-
-            # Print response
-            
-            
-
+        listenThread.join()
+        
 if __name__ == '__main__':
     main()
