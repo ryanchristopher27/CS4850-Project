@@ -7,6 +7,7 @@
     # It allows the user to input commands into the client
     # These commands are filtered within this program and sent to the server
     # The client can also receive messages from the server
+    # It utilizes threads to both listen for the server and user input at the same time
 
 import socket
 import threading

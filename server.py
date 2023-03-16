@@ -6,6 +6,7 @@
 # Description: This is the program that runs the server
     # It receives messages from the clients and returns a corresponding output
     # Up to 3 clients are able to connect to this server at all times
+    # It utilizes threads to maintain contact with all 3 clients at the same time
 
 import socket
 import threading
